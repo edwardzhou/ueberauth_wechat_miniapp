@@ -45,9 +45,10 @@ defmodule Ueberauth.Strategy.Wechat do
       end
 
   """
-  use Ueberauth.Strategy, uid_field: :openid,
-                          default_scope: "snsapi_userinfo",
-                          oauth2_module: Ueberauth.Strategy.Wechat.OAuth
+  use Ueberauth.Strategy,
+    uid_field: :openid,
+    default_scope: "snsapi_userinfo",
+    oauth2_module: Ueberauth.Strategy.Wechat.OAuth
 
   alias Ueberauth.Auth.Info
   alias Ueberauth.Auth.Credentials
@@ -81,6 +82,14 @@ defmodule Ueberauth.Strategy.Wechat do
   end
 
   @doc """
+  Enable test callback with code=test_code
+  """
+  def handle_callback!(%Plug.Conn{params: %{"code" => "test_code"}} = conn) do
+    IEx.pry()
+    conn
+  end
+
+  @doc """
   Handles the callback from Wechat. When there is a failure from Wechat the failure is included in the
   `ueberauth_failure` struct. Otherwise the information returned from Wechat is returned in the `Ueberauth.Auth` struct.
   """
@@ -89,7 +98,9 @@ defmodule Ueberauth.Strategy.Wechat do
     token = apply(module, :get_token!, [[code: code]])
 
     if token.access_token == nil do
-      set_errors!(conn, [error(token.other_params["error"], token.other_params["error_description"])])
+      set_errors!(conn, [
+        error(token.other_params["error"], token.other_params["error_description"])
+      ])
     else
       fetch_user(conn, token)
     end
@@ -117,6 +128,7 @@ defmodule Ueberauth.Strategy.Wechat do
       conn
       |> option(:uid_field)
       |> to_string
+
     conn.private.wechat_user[user]
   end
 
@@ -124,9 +136,9 @@ defmodule Ueberauth.Strategy.Wechat do
   Includes the credentials from the Wechat response.
   """
   def credentials(conn) do
-    token        = conn.private.wechat_token
-    scope_string = (token.other_params["scope"] || "")
-    scopes       = String.split(scope_string, ",")
+    token = conn.private.wechat_token
+    scope_string = token.other_params["scope"] || ""
+    scopes = String.split(scope_string, ",")
 
     %Credentials{
       token: token.access_token,
@@ -145,8 +157,8 @@ defmodule Ueberauth.Strategy.Wechat do
     user = conn.private.wechat_user
 
     %Info{
-      nickname:    user["nickname"],
-      image:       user["headimgurl"],
+      nickname: user["nickname"],
+      image: user["headimgurl"]
     }
   end
 
@@ -154,7 +166,7 @@ defmodule Ueberauth.Strategy.Wechat do
   Stores the raw information (including the token) obtained from the Wechat callback.
   """
   def extra(conn) do
-    %Extra {
+    %Extra{
       raw_info: %{
         token: conn.private.wechat_token,
         user: conn.private.wechat_user
@@ -168,9 +180,11 @@ defmodule Ueberauth.Strategy.Wechat do
     case Ueberauth.Strategy.Wechat.OAuth.get(token, "/sns/userinfo") do
       {:ok, %OAuth2.Response{status_code: 401, body: _body}} ->
         set_errors!(conn, [error("token", "unauthorized")])
+
       {:ok, %OAuth2.Response{status_code: _status_code, body: user}} ->
         user = Poison.decode!(user)
         put_private(conn, :wechat_user, user)
+
       {:error, %OAuth2.Error{reason: reason}} ->
         set_errors!(conn, [error("OAuth2", reason)])
     end
