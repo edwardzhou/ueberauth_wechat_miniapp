@@ -84,10 +84,7 @@ defmodule Ueberauth.Strategy.Wechat do
   @doc """
   Enable test callback with code=test_code
   """
-  def handle_callback!(%Plug.Conn{params: %{"code" => "test_code"}} = conn) do
-    IEx.pry()
-    conn
-  end
+  def handle_callback!(%Plug.Conn{params: %{"code" => "test_code"}} = conn), do: conn
 
   @doc """
   Handles the callback from Wechat. When there is a failure from Wechat the failure is included in the
