@@ -1,4 +1,4 @@
-defmodule Ueberauth.Strategy.Wechat.OAuth do
+defmodule Ueberauth.Strategy.WechatMiniapp.OAuth do
   @moduledoc """
   An implementation of OAuth2 for wechat.
 
@@ -14,7 +14,7 @@ defmodule Ueberauth.Strategy.Wechat.OAuth do
     strategy: __MODULE__,
     site: "https://api.weixin.qq.com",
     authorize_url: "https://open.weixin.qq.com/connect/oauth2/authorize",
-    token_url: "https://api.weixin.qq.com/sns/oauth2/access_token",
+    token_url: "https://api.weixin.qq.com/sns/jscode2session"
   ]
 
   @doc """
