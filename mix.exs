@@ -1,18 +1,18 @@
-defmodule Ueberauth.Wechat.Mixfile do
+defmodule Ueberauth.WechatMiniapp.Mixfile do
   use Mix.Project
 
   @version "0.0.1"
 
   def project do
-    [app: :ueberauth_wechat,
+    [app: :ueberauth_wechat_miniapp,
      version: @version,
-     name: "Ueberauth Wechat",
+     name: "Ueberauth Wechat Miniapp",
      package: package(),
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     source_url: "https://github.com/sllt/ueberauth_wechat",
-     homepage_url: "https://github.com/sllt/ueberauth_wechat",
+     source_url: "https://github.com/edwardzhou/ueberauth_wechat_miniapp",
+     homepage_url: "https://github.com/edwardzhou/ueberauth_wechat_miniapp",
      description: description(),
      deps: deps(),
      docs: docs()]
@@ -41,13 +41,13 @@ defmodule Ueberauth.Wechat.Mixfile do
   end
 
   defp description do
-    "An Ueberauth strategy for using Wechat to authenticate your users."
+    "An Ueberauth strategy for using Wechat Miniapp to authenticate your users."
   end
 
   defp package do
     [files: ["lib", "mix.exs", "README.md", "LICENSE"],
-      maintainers: ["sllt"],
+      maintainers: ["edwardzhou"],
       licenses: ["MIT"],
-      links: %{"GitHub": "https://github.com/sllt/ueberauth_wechat"}]
+      links: %{"GitHub": "https://github.com/edwardzhou/ueberauth_wechat_miniapp"}]
   end
 end
