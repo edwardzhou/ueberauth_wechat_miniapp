@@ -201,7 +201,7 @@ defmodule Ueberauth.Strategy.WechatMiniapp do
     # end
   end
 
-  defp decrypt_data((%{params: params} = conn, miniapp_token) do
+  defp decrypt_data(%{params: params} = conn, miniapp_token) do
     dec_key = miniapp_token[:session_key] |> Base.decode64!()
     iv_key = params[:iv] |> Base.decode64!()
     debase64_data = params[:encrypted_data] |> Base.decode64!()
@@ -211,11 +211,11 @@ defmodule Ueberauth.Strategy.WechatMiniapp do
     # unpad
     to_remove = :binary.last(binary_data)
     case binary_data
-          |> :binary_part(0, byte_size(binary_data) - to_remove)
+          |> :binary.part(0, byte_size(binary_data) - to_remove)
           |> Poison.decode() do
       {:ok, data} -> 
         union_id = data[:unionId]
-        {:ok, Map.put(data, "unionid", union_id}
+        {:ok, Map.put(data, "unionid", union_id)}
       _ ->
         {:error, :data_corrupted}      
     end
@@ -230,7 +230,7 @@ defmodule Ueberauth.Strategy.WechatMiniapp do
             |> Base.encode16
             |> String.downcase
     case sha1 do
-      ^signnature ->
+      ^signature ->
         {:ok, signature}
       _ ->
         {:error, :signature_not_matched}
