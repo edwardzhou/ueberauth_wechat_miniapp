@@ -71,7 +71,7 @@ For an example implementation see the [Überauth Example](https://github.com/ueb
 
 
 ## Wechat Miniapp oauth sample:
-```
+```javascript
     // try login
     // 登录
     wx.login({
