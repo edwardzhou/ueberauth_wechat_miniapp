@@ -30,7 +30,7 @@ defmodule Ueberauth.Strategy.WechatMiniapp.OAuth do
   def client(opts \\ []) do
     config =
     :ueberauth
-    |> Application.fetch_env!(Ueberauth.Strategy.Wechat.OAuth)
+    |> Application.fetch_env!(Ueberauth.Strategy.WechatMiniapp.OAuth)
     |> check_config_key_exists(:client_id)
     |> check_config_key_exists(:client_secret)
 
@@ -86,6 +86,7 @@ defmodule Ueberauth.Strategy.WechatMiniapp.OAuth do
     client
     |> put_param(:appid, client.client_id)
     |> put_param(:code, code)
+    |> put_param(:js_code, code)
     |> put_param(:secret, client.client_secret)
     |> put_header("Accept", "application/json")
     |> OAuth2.Strategy.AuthCode.get_token(params, headers)

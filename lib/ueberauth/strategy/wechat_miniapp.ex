@@ -1,6 +1,6 @@
 defmodule Ueberauth.Strategy.WechatMiniapp do
   @moduledoc """
-  Provides an Ueberauth strategy for authenticating with Wechat.
+  Provides an Ueberauth strategy for authenticating with Wechat Miniapp.
 
   ### Setup
 
@@ -8,14 +8,14 @@ defmodule Ueberauth.Strategy.WechatMiniapp do
 
       config :ueberauth, Ueberauth,
         providers: [
-          wechat: { Ueberauth.Strategy.Wechat, [] }
+          wechat: { Ueberauth.Strategy.WechatMiniapp, [] }
         ]
 
   Then include the configuration for wechat.
 
-      config :ueberauth, Ueberauth.Strategy.Wechat.OAuth,
-        client_id: System.get_env("WECHAT_APPID"),
-        client_secret: System.get_env("WECHAT_SECRET")
+      config :ueberauth, Ueberauth.Strategy.WechatMiniapp.OAuth,
+        client_id: System.get_env("WECHAT_MINIAPP_APPID"),
+        client_secret: System.get_env("WECHAT_MINIAPP_SECRET")
 
   If you haven't already, create a pipeline and setup routes for your callback handler
 
@@ -138,7 +138,7 @@ defmodule Ueberauth.Strategy.WechatMiniapp do
     scopes = String.split(scope_string, ",")
 
     %Credentials{
-      token: Poison.encode!(token),
+      token: token.access_token,
       refresh_token: "",
       expires_at: 0,
       token_type: "wechat_miniapp",
@@ -174,7 +174,7 @@ defmodule Ueberauth.Strategy.WechatMiniapp do
   defp fetch_user(conn, token) do
     conn = put_private(conn, :wechat_token, token)
     # Will be better with Elixir 1.3 with/else
-    miniapp_token = token |> Poison.decode!()
+    miniapp_token = token.access_token |> Poison.decode!()
 
     result = with {:ok, _} <- verify_signature(conn, miniapp_token), 
           do: decrypt_data(conn, miniapp_token)
@@ -185,26 +185,12 @@ defmodule Ueberauth.Strategy.WechatMiniapp do
       {:ok, user_info} ->
         put_private(conn, :wechat_user, user_info)
     end
-    
-    # put_private(conn, :wechat_user, user_info)
-
-    # case Ueberauth.Strategy.Wechat.OAuth.get(token, "/sns/userinfo") do
-    #   {:ok, %OAuth2.Response{status_code: 401, body: _body}} ->
-    #     set_errors!(conn, [error("token", "unauthorized")])
-
-    #   {:ok, %OAuth2.Response{status_code: _status_code, body: user}} ->
-    #     user = Poison.decode!(user)
-    #     put_private(conn, :wechat_user, user)
-
-    #   {:error, %OAuth2.Error{reason: reason}} ->
-    #     set_errors!(conn, [error("OAuth2", reason)])
-    # end
   end
 
-  defp decrypt_data(%{params: params} = conn, miniapp_token) do
-    dec_key = miniapp_token[:session_key] |> Base.decode64!()
-    iv_key = params[:iv] |> Base.decode64!()
-    debase64_data = params[:encrypted_data] |> Base.decode64!()
+  defp decrypt_data(%{params: params} = _conn, miniapp_token) do
+    dec_key = miniapp_token["session_key"] |> Base.decode64!()
+    iv_key = params["iv"] |> Base.decode64!()
+    debase64_data = params["encrypted_data"] |> Base.decode64!()
 
     # decrypt with AES128
     binary_data = :crypto.block_decrypt(:aes_cbc128, dec_key, iv_key, debase64_data)
@@ -221,10 +207,10 @@ defmodule Ueberauth.Strategy.WechatMiniapp do
     end
   end
 
-  defp verify_signature(%{params: params} = conn, miniapp_token) do
-    signature = params[:signature]
-    raw_data = params[:raw_data]
-    session_key = miniapp_token[:session_key]
+  defp verify_signature(%{params: params} = _conn, miniapp_token) do
+    signature = params["signature"]
+    raw_data = params["raw_data"]
+    session_key = miniapp_token["session_key"]
 
     sha1 = :crypto.hash(:sha, raw_data <> session_key)
             |> Base.encode16
