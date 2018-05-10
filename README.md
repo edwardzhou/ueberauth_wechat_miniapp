@@ -67,5 +67,43 @@ For an example implementation see the [Überauth Example](https://github.com/ueb
 
 ## Calling
     get or post
-    /auth/wechat_miniapp?code=<js_code>&iv=<iv>&encrypted_data=<encrypted_data>&signature=<signature>&raw_data=<raw_data>
+    /auth/wechat_miniapp/callback?code=<js_code>&iv=<iv>&encrypted_data=<encrypted_data>&signature=<signature>&raw_data=<raw_data>
+
+
+## Wechat Miniapp oauth sample:
+```
+    // try login
+    // 登录
+    wx.login({
+        success: res => {
+        if (res.code) {
+            const code = res.code;
+
+            wx.getUserInfo({withCredentials: true,
+            success: user_res => {
+                var form_data = {
+                code: code,
+                raw_data: user_res.rawData,
+                signature: user_res.signature,
+                encrypted_data: user_res.encryptedData,
+                iv: user_res.iv
+                }
+
+                wx.request({
+                url: 'https://your.domain.com/auth/wechat_miniapp/callback',
+                data: form_data,
+                success: login_res => {
+                    console.log("login response: " + JSON.stringify(res));
+                },
+                fail: res => {
+                console.log("login failed!")
+                }
+                })
+            }
+            })
+        }
+        }
+    })
+
+```
 
