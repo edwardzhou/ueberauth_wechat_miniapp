@@ -25,7 +25,7 @@
     ```elixir
     config :ueberauth, Ueberauth,
       providers: [
-        wechat: {Ueberauth.Strategy.WechatMiniapp, []}
+        wechat_miniapp: {Ueberauth.Strategy.WechatMiniapp, []}
       ]
     ```
 
